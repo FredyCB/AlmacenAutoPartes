@@ -61,7 +61,7 @@ def custom_openapi():
 app.openapi = custom_openapi
 
 
-# Incluir routers
+# Uso de los routers en la app
 app.include_router(inventory_routes_router)
 app.include_router(search_routes_router)
 app.include_router(parts_routes_router)
@@ -73,11 +73,12 @@ app.include_router(vehicle_routes_router)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Rutas base
+# Ruta base para crea usuario
 @app.post("/users", tags=["Users"])
 async def create_user_endpoint(user: User) -> User:
     return await create_user(user)
 
+# Ruta base logear un usuario/admin
 @app.post("/users/login", tags=["Users"])
 async def login_access(l: Login) -> dict:
     return await login(l)
