@@ -1,7 +1,3 @@
-"""
-Módulo de pipelines para operaciones avanzadas en el almacén de autopartes
-"""
-
 from .inventory import (
     pipeline_inventory_with_part
 )
