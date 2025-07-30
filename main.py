@@ -14,8 +14,6 @@ from routes.search_routes import router as search_routes_router
 from routes.inventory_routes import router as inventory_routes_router
 from routes.parts_routes import router as parts_routes_router
 from routes.orders_routes import router as orders_routes_router
-
-
 from routes.provider_routes import router as provider_routes_router
 from routes.vehicle_routes import router as vehicle_routes_router
 
@@ -36,14 +34,14 @@ app = FastAPI(
     ]
 )
 
-# ✅ Configuración global para que aparezca el botón Authorize
+# Configuración global para que aparezca el botón Authorize
 def custom_openapi():
     if app.openapi_schema:
         return app.openapi_schema
     openapi_schema = get_openapi(
         title=app.title,
         version=app.version,
-        description="API para el Almacén de Autopartes (Protegida con JWT)",
+        description="API para el Almacén de Autopartes",
         routes=app.routes,
     )
     openapi_schema["components"]["securitySchemes"] = {
