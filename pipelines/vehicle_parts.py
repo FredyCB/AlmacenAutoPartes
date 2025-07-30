@@ -1,7 +1,7 @@
 def pipeline_parts_by_vehicle(vehicle_id: str):
-    """
-    Obtener autopartes compatibles con un vehículo específico.
-    """
+    
+    # Obtener autopartes compatibles con un vehículo específico.
+
     return [
         { "$match": { "id_vehicle": vehicle_id } },
         {
