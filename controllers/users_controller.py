@@ -18,9 +18,9 @@ if not firebase_admin._apps:
     firebase_admin.initialize_app(cred)
 
 async def create_user(user: User) -> User:
-    """
-    Crea un usuario en Firebase y lo registra en MongoDB (sin almacenar la contraseña ni permitir definir admin).
-    """
+    
+    #Crea un usuario en Firebase y lo registra en MongoDB.
+
     try:
         user_record = firebase_auth.create_user(
             email=user.email,
@@ -48,7 +48,7 @@ async def create_user(user: User) -> User:
             lastname=user.lastname,
             email=user.email,
             active=True,
-            password="*********"  # Nunca se retorna la real
+            password="*********"
         )
 
     except Exception as e:
@@ -57,9 +57,8 @@ async def create_user(user: User) -> User:
         raise HTTPException(status_code=500, detail=f"Error de base de datos: {str(e)}")
 
 async def login(user: Login) -> dict:
-    """
-    Autenticación de usuario mediante Firebase + generación de JWT.
-    """
+    
+    #Autenticación de usuario mediante Firebase + generación de JWT.
     api_key = os.getenv("FIREBASE_API_KEY")
     url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={api_key}"
 
