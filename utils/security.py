@@ -13,9 +13,10 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 if not SECRET_KEY:
     raise ValueError("Falta la variable de entorno SECRET_KEY")
 
+# Habilita la seguridad basada en tokens tipo Bearer 
 security = HTTPBearer()
 
-
+# Crea un token valido para un usuario logeado
 def create_jwt_token(firstname, lastname, email, active, admin, user_id):
     expiration = datetime.utcnow() + timedelta(hours=1)
     payload = {
