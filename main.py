@@ -34,7 +34,7 @@ app = FastAPI(
     ]
 )
 
-# Configuración global para que aparezca el botón Authorize
+# Configuración global para el botón Authorize
 def custom_openapi():
     if app.openapi_schema:
         return app.openapi_schema
