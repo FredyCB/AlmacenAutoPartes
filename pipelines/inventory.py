@@ -1,7 +1,7 @@
 def pipeline_inventory_with_part():
-    """
-    Pipeline para unir inventario con información de autoparte (Catalog).
-    """
+    
+    #Pipeline para unir inventario con información de autoparte (Catalog).
+    
     return [
         {
             "$lookup": {
