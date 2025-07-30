@@ -2,15 +2,14 @@ from pydantic import BaseModel, Field, field_validator
 from typing import Optional
 import re
 
+#Validacion de credenciales de usuario 
 class UserCreate(BaseModel):
-    """
-    Modelo para crear usuario (sin campos admin ni active).
-    """
     name: str = Field(pattern=r"^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ' -]+$")
     lastname: str = Field(pattern=r"^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ' -]+$")
     email: str = Field(pattern=r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
     password: str = Field(min_length=8, max_length=64)
 
+#validacion de contraseña del usuario
     @field_validator('password')
     @classmethod
     def validate_password(cls, value: str):
@@ -21,9 +20,8 @@ class UserCreate(BaseModel):
 
 
 class User(BaseModel):
-    """
-    Modelo general del usuario (para consultas/respuestas).
-    """
+  
+    #Modelo general del usuario
     id: Optional[str] = Field(default=None)
     name: str
     lastname: str
