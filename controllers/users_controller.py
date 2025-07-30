@@ -12,7 +12,7 @@ from utils.mongodb import get_collection
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Inicializar Firebase solo una vez
+# Inicializar Firebase
 if not firebase_admin._apps:
     cred = credentials.Certificate("secrets/autopartes-firebase.json")
     firebase_admin.initialize_app(cred)
@@ -37,7 +37,7 @@ async def create_user(user: User) -> User:
             "lastname": user.lastname,
             "email": user.email,
             "active": True,
-            "admin": False  # Se fuerza a False por defecto
+            "admin": False 
         }
 
         inserted = coll.insert_one(new_user)
