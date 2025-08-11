@@ -6,6 +6,19 @@ from fastapi.security import HTTPBearer
 from functools import wraps
 from dotenv import load_dotenv
 
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
+from typing import Optional
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+
+# Añadir esta función nueva
+def allow_without_token():
+    """Decorador para endpoints que no requieren autenticación"""
+    async def dummy_dependency():
+        return None
+    return Depends(dummy_dependency)
+
 load_dotenv()
 
 SECRET_KEY = os.getenv("SECRET_KEY")
@@ -101,3 +114,4 @@ def validateadmin(func):
             raise HTTPException(status_code=401, detail="Invalid token")
         return await func(*args, **kwargs)
     return wrapper
+
