@@ -1,34 +1,25 @@
-from pydantic import BaseModel, Field
-from typing import Optional
+from pydantic import BaseModel, Field, validator
 from bson import ObjectId
-from models.proveedor import Proveedor
+from typing import Optional
+from models.provider import ProviderOut
 
-class PyObjectId(ObjectId):
-    @classmethod
-    def __get_validators__(cls):
-        yield cls.validate
-
-    @classmethod
-    def validate(cls, v):
-        if not ObjectId.is_valid(v):
-            raise ValueError("Invalid ObjectId")
-        return ObjectId(v)
-
-class PartCreate(BaseModel):
-    nombre: str = Field(..., min_length=3)
-    descripcion: str
-    precio: float = Field(..., gt=0)
+class PartBase(BaseModel):
+    name: str = Field(..., min_length=3, max_length=100)
+    description: str = Field(..., min_length=10)
+    price: float = Field(..., gt=0)
     stock: int = Field(..., ge=0)
-    categoria: str
-    proveedor_id: str
+    category: str
+    provider_id: str
 
-class Part(PartCreate):
-    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
-    creado_por: str
-    fecha_creacion: datetime = Field(default_factory=datetime.now)
+    @validator('provider_id')
+    def validate_provider_id(cls, v):
+        if not ObjectId.is_valid(v):
+            raise ValueError("ID de proveedor inválido")
+        return v
 
-    class Config:
-        json_encoders = {ObjectId: str}
+    @validator('price')
+    def round_price(cls, v):
+        return round(v, 2)
 
-class PartWithProvider(Part):
-    proveedor_info: Proveedor
+class PartWithProvider(PartOut):
+    provider_info: ProviderOut
