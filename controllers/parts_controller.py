@@ -1,57 +1,36 @@
-from fastapi import HTTPException
+from fastapi import HTTPException, status
 from bson import ObjectId
-from utils.mongodb import get_collection
-from models.part import Part
+from typing import Optional, List
+from models.parts_model import *
+from models.proveedor_model import ProveedorOut
+from pipelines.parts_pipelines import *
+from utils.db import db
+from utils.auth import get_current_user
 
-parts_coll = get_collection("catalog")
+async def validar_referencias(part: PartIn):
+    # Validar proveedor
+    if not await db["proveedores"].find_one({"_id": ObjectId(part.proveedor_id)}):
+        raise HTTPException(status_code=400, detail="Proveedor no existe")
+    
+    # Validar categoría
+    if not await db["categorias"].find_one({"nombre": part.categoria}):
+        raise HTTPException(status_code=400, detail="Categoría no existe")
 
-def create_part(data: dict):
-    # data viene del route (pydantic Part o dict)
-    if isinstance(data, Part):
-        doc = data.model_dump(exclude={"id"})
-    else:
-        doc = data
-    result = parts_coll.insert_one(doc)
-    return {"message": "Part created", "id": str(result.inserted_id)}
+async def create_part(part: PartIn, usuario_actual: dict):
+    await validar_referencias(part)
+    
+    part_dict = part.dict()
+    part_dict["proveedor_id"] = ObjectId(part_dict["proveedor_id"])
+    part_dict["creado_por"] = usuario_actual["email"]
+    
+    nuevo = await db["parts"].insert_one(part_dict)
+    creado = await db["parts"].find_one({"_id": nuevo.inserted_id})
+    return PartOut(**creado)
 
-def get_part_by_id(part_id: str):
-    try:
-        _id = ObjectId(part_id)
-    except Exception:
-        raise HTTPException(status_code=400, detail="Invalid part id")
-    doc = parts_coll.find_one({"_id": _id})
-    if not doc:
-        raise HTTPException(status_code=404, detail="Part not found")
-    doc["id"] = str(doc["_id"])
-    del doc["_id"]
-    return doc
+async def get_parts_with_proveedor():
+    cursor = db["parts"].aggregate(pipeline_parts_proveedor())
+    return [PartWithProveedor(**doc) async for doc in cursor]
 
-def update_part(part_id: str, data: dict):
-    try:
-        _id = ObjectId(part_id)
-    except Exception:
-        raise HTTPException(status_code=400, detail="Invalid part id")
-    result = parts_coll.update_one({"_id": _id}, {"$set": data})
-    if result.matched_count == 0:
-        raise HTTPException(status_code=404, detail="Part not found")
-    return {"message": "Part updated"}
-
-def delete_part(part_id: str):
-    try:
-        _id = ObjectId(part_id)
-    except Exception:
-        raise HTTPException(status_code=400, detail="Invalid part id")
-    result = parts_coll.update_one({"_id": _id}, {"$set": {"active": False}})
-    if result.matched_count == 0:
-        raise HTTPException(status_code=404, detail="Part not found")
-    return {"message": "Part deactivated"}
-
-def add_compatibility(part_id: str, vehicle_id: str):
-    try:
-        _pid = ObjectId(part_id)
-        _vid = ObjectId(vehicle_id)
-    except Exception:
-        raise HTTPException(status_code=400, detail="Invalid ids")
-    coll = get_collection("vehicle_parts")
-    coll.insert_one({"part_id": _pid, "vehicle_id": _vid})
-    return {"message": "Compatibility added"}
+async def get_parts_stats():
+    cursor = db["parts"].aggregate(pipeline_estadisticas())
+    return [doc async for doc in cursor]
