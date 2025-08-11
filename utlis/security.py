@@ -6,6 +6,7 @@ from fastapi.security import HTTPBearer
 from functools import wraps
 from dotenv import load_dotenv
 
+# Esto es nuevo
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from typing import Optional
@@ -18,6 +19,8 @@ def allow_without_token():
     async def dummy_dependency():
         return None
     return Depends(dummy_dependency)
+
+#Lo demas de aqui en adelante es lo que ya estaba 
 
 load_dotenv()
 
@@ -114,4 +117,5 @@ def validateadmin(func):
             raise HTTPException(status_code=401, detail="Invalid token")
         return await func(*args, **kwargs)
     return wrapper
+
 
