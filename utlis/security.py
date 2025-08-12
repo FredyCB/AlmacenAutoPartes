@@ -18,8 +18,6 @@ firebase_config = json.loads(firebase_config_json)
 cred = credentials.Certificate(firebase_config)
 firebase_admin.initialize_app(cred)
 
-
-
 load_dotenv()
 
 SECRET_KEY = os.getenv("SECRET_KEY")
@@ -125,4 +123,3 @@ def validateadmin(func):
 
         return await func(*args, **kwargs)
     return wrapper
-
