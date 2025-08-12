@@ -5,6 +5,20 @@ from fastapi import HTTPException, Request
 from fastapi.security import HTTPBearer
 from functools import wraps
 from dotenv import load_dotenv
+import json
+import firebase_admin
+from firebase_admin import credentials
+
+# Cargamos el JSON desde la variable de entorno
+firebase_config_json = os.environ.get("FIREBASE_CONFIG")
+if not firebase_config_json:
+    raise RuntimeError("FIREBASE_CONFIG environment variable not set")
+
+firebase_config = json.loads(firebase_config_json)
+cred = credentials.Certificate(firebase_config)
+firebase_admin.initialize_app(cred)
+
+
 
 load_dotenv()
 
@@ -111,5 +125,4 @@ def validateadmin(func):
 
         return await func(*args, **kwargs)
     return wrapper
-
 
