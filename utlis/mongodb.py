@@ -2,15 +2,18 @@ import os
 from dotenv import load_dotenv
 from pymongo import MongoClient
 from pymongo.server_api import ServerApi
+import urllib.parse
 
 load_dotenv()
 
 DB = os.getenv("DATABASE_NAME")
 URI = os.getenv("MONGODB_URI")
 
-def get_collection(collection_name: str):
-    if not DB or not URI:
-        raise ValueError("Faltan variables de entorno MONGODB_URI o DATABASE_NAME")
+
+def get_collection(almacen: str):
+    """Devuelve una colección desde la base de datos MongoDB"""
+    if not URI or not DB:
+        raise ValueError("Faltan las variables de entorno MONGO_URI o MONGO_DB_NAME")
 
     client = MongoClient(
         URI,
@@ -18,5 +21,4 @@ def get_collection(collection_name: str):
         tls=True,
         tlsAllowInvalidCertificates=True
     )
-    client.admin.command("ping")
-    return client[DB][collection_name]
+    return client[DB][almacen]
