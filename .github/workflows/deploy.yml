@@ -34,7 +34,7 @@ jobs:
           DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
           FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
-         FIREBASE_CONFIG: ${{ secrets.FIREBASE_CONFIG }}}}
+          FIREBASE_CONFIG: ${{ secrets.FIREBASE_CONFIG }}
         run: |
           python -c "from main import app; print('FASTAPI app imported successfully')"
 
@@ -44,7 +44,7 @@ jobs:
           DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
           FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
-         FIREBASE_CONFIG: ${{ secrets.FIREBASE_CONFIG }}
+          FIREBASE_CONFIG: ${{ secrets.FIREBASE_CONFIG }}
         run: |
           pytest -v test_database.py || echo "No tests found, skipping"
 
@@ -74,6 +74,11 @@ jobs:
       - name: Deploy to Railway
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+          FIREBASE_CONFIG: ${{ secrets.FIREBASE_CONFIG }}
         run: |
           echo "starting deployment..."
           railway up --service "autopartes-api" || \
