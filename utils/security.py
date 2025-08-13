@@ -8,6 +8,13 @@ from dotenv import load_dotenv
 import json
 import firebase_admin
 from firebase_admin import credentials
+import os, json, base64
+
+
+firebase_config_b64 = os.getenv("FIREBASE_CONFIG")
+firebase_config_json = base64.b64decode(firebase_config_b64).decode("utf-8")
+firebase_config = json.loads(firebase_config_json)
+
 
 # Cargamos el JSON desde la variable de entorno
 firebase_config_json = os.environ.get("FIREBASE_CONFIG")
@@ -128,3 +135,4 @@ def validateadmin(func):
 
         return await func(*args, **kwargs)
     return wrapper
+
