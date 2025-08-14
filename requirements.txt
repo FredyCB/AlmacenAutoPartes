@@ -6,4 +6,3 @@ firebase-admin==6.5.0
 requests==2.31.0
 PyJWT==2.8.0
 pydantic==2.3.0
-bson==0.5.10
