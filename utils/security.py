@@ -17,11 +17,14 @@ firebase_config_b64 = os.getenv("FIREBASE_CREDENTIALS_BASE64")
 if not firebase_config_b64:
     raise RuntimeError("FIREBASE_CREDENTIALS_BASE64 no está configurada")
 
-firebase_config_json = base64.b64decode(firebase_config_b64).decode("utf-8")
-firebase_config = json.loads(firebase_config_json)
-
-cred = credentials.Certificate(firebase_config)
-firebase_admin.initialize_app(cred)
+try:
+    firebase_config_json = base64.b64decode(firebase_config_b64).decode("utf-8")
+    firebase_config = json.loads(firebase_config_json)
+    cred = credentials.Certificate(firebase_config)
+    if not firebase_admin._apps:  # Evitar inicialización duplicada
+        firebase_admin.initialize_app(cred)
+except Exception as e:
+    raise RuntimeError(f"Error al inicializar Firebase: {e}")
 
 # 🔹 Cargar SECRET_KEY
 SECRET_KEY = os.getenv("SECRET_KEY")
