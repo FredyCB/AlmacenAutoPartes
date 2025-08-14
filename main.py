@@ -31,14 +31,15 @@ app.add_middleware(
 )
 
 # register routers
-app.include_router(users_router)
-app.include_router(parts_router)
-app.include_router(inventory_router)
-app.include_router(orders_router)
-app.include_router(providers_router)
-app.include_router(search_router)
-app.include_router(vehicles_router)
-app.include_router(vehicle_parts_router)
+# register routers
+app.include_router(users_router, prefix="/api")
+app.include_router(parts_router, prefix="/api")
+app.include_router(inventory_router, prefix="/api")
+app.include_router(orders_router, prefix="/api")
+app.include_router(providers_router, prefix="/api")
+app.include_router(search_router, prefix="/api")
+app.include_router(vehicles_router, prefix="/api")
+app.include_router(vehicle_parts_router, prefix="/api")
 
 @app.get("/")
 def root():
