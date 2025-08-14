@@ -8,32 +8,27 @@ from dotenv import load_dotenv
 import json
 import firebase_admin
 from firebase_admin import credentials
-import os, json, base64
-
-
-firebase_config_b64 = os.getenv("FIREBASE_CONFIG")
-firebase_config_json = base64.b64decode(firebase_config_b64).decode("utf-8")
-firebase_config = json.loads(firebase_config_json)
-
-
-# Cargamos el JSON desde la variable de entorno
-firebase_config_json = os.environ.get("FIREBASE_CONFIG")
-if not firebase_config_json:
-    raise RuntimeError("FIREBASE_CONFIG environment variable not set")
-
-firebase_config = json.loads(firebase_config_json)
-cred = credentials.Certificate(firebase_config)
-firebase_admin.initialize_app(cred)
+import base64
 
 load_dotenv()
 
-SECRET_KEY: str = os.getenv("SECRET_KEY") or ""
+# 🔹 Cargar Firebase config desde variable Base64
+firebase_config_b64 = os.getenv("FIREBASE_CREDENTIALS_BASE64")
+if not firebase_config_b64:
+    raise RuntimeError("FIREBASE_CREDENTIALS_BASE64 no está configurada")
 
+firebase_config_json = base64.b64decode(firebase_config_b64).decode("utf-8")
+firebase_config = json.loads(firebase_config_json)
+
+cred = credentials.Certificate(firebase_config)
+firebase_admin.initialize_app(cred)
+
+# 🔹 Cargar SECRET_KEY
+SECRET_KEY = os.getenv("SECRET_KEY")
 if not SECRET_KEY:
     raise ValueError("Falta la variable de entorno SECRET_KEY")
 
 security = HTTPBearer()
-
 
 def create_jwt_token(firstname, lastname, email, active, admin, user_id):
     expiration = datetime.utcnow() + timedelta(hours=1)
@@ -49,13 +44,10 @@ def create_jwt_token(firstname, lastname, email, active, admin, user_id):
     }
     return jwt.encode(payload, SECRET_KEY, algorithm="HS256")
 
-
 def validateuser(func):
     @wraps(func)
     async def wrapper(*args, **kwargs):
-        request = next((arg for arg in args if isinstance(arg, Request)), None)
-        if not request:
-            request = kwargs.get("request")
+        request = next((arg for arg in args if isinstance(arg, Request)), None) or kwargs.get("request")
         if not request:
             raise HTTPException(status_code=400, detail="Request object not found")
 
@@ -68,13 +60,9 @@ def validateuser(func):
             raise HTTPException(status_code=401, detail="Esquema inválido")
 
         try:
-            if not SECRET_KEY:
-                raise HTTPException(status_code=500, detail="SECRET_KEY is not set")
             payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
-
             if not payload.get("email") or not payload.get("active"):
                 raise HTTPException(status_code=401, detail="Token inválido")
-
             if datetime.utcfromtimestamp(payload["exp"]) < datetime.utcnow():
                 raise HTTPException(status_code=401, detail="Token expirado")
 
@@ -92,13 +80,10 @@ def validateuser(func):
         return await func(*args, **kwargs)
     return wrapper
 
-
 def validateadmin(func):
     @wraps(func)
     async def wrapper(*args, **kwargs):
-        request = next((arg for arg in args if isinstance(arg, Request)), None)
-        if not request:
-            request = kwargs.get("request")
+        request = next((arg for arg in args if isinstance(arg, Request)), None) or kwargs.get("request")
         if not request:
             raise HTTPException(status_code=400, detail="Request object not found")
 
@@ -109,16 +94,11 @@ def validateadmin(func):
         schema, token = auth.split()
         if schema.lower() != "bearer":
             raise HTTPException(status_code=401, detail="Esquema inválido")
+
         try:
-            if not SECRET_KEY:
-                raise HTTPException(status_code=500, detail="SECRET_KEY is not set")
             payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
-
             if not payload.get("email") or not payload.get("admin") or not payload.get("active"):
                 raise HTTPException(status_code=401, detail="No autorizado")
-            if not payload.get("email") or not payload.get("admin") or not payload.get("active"):
-                raise HTTPException(status_code=401, detail="No autorizado")
-
             if datetime.utcfromtimestamp(payload["exp"]) < datetime.utcnow():
                 raise HTTPException(status_code=401, detail="Token expirado")
 
@@ -135,4 +115,3 @@ def validateadmin(func):
 
         return await func(*args, **kwargs)
     return wrapper
-
