@@ -45,6 +45,8 @@ def create_jwt_token(firstname, lastname, email, active, admin, user_id):
         "exp": expiration,
         "iat": datetime.utcnow()
     }
+    if not isinstance(SECRET_KEY, str) or not SECRET_KEY:
+        raise ValueError("SECRET_KEY debe estar definido y ser una cadena no vacía")
     return jwt.encode(payload, SECRET_KEY, algorithm="HS256")
 
 def validateuser(func):
@@ -63,6 +65,8 @@ def validateuser(func):
             raise HTTPException(status_code=401, detail="Esquema inválido")
 
         try:
+            if not isinstance(SECRET_KEY, str) or not SECRET_KEY:
+                raise HTTPException(status_code=500, detail="SECRET_KEY no está configurada correctamente")
             payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
             if not payload.get("email") or not payload.get("active"):
                 raise HTTPException(status_code=401, detail="Token inválido")
@@ -99,6 +103,8 @@ def validateadmin(func):
             raise HTTPException(status_code=401, detail="Esquema inválido")
 
         try:
+            if not isinstance(SECRET_KEY, str) or not SECRET_KEY:
+                raise HTTPException(status_code=500, detail="SECRET_KEY no está configurada correctamente")
             payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
             if not payload.get("email") or not payload.get("admin") or not payload.get("active"):
                 raise HTTPException(status_code=401, detail="No autorizado")
